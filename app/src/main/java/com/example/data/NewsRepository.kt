@@ -5,18 +5,18 @@ import kotlinx.coroutines.flow.Flow
 import com.example.BuildConfig
 
 class NewsRepository(private val newsDao: NewsDao) {
-    fun getArticlesByLanguage(language: String): Flow<List<NewsArticle>> = newsDao.getArticlesByLanguage(language)
+    fun getArticlesByLanguageAndCategory(language: String, category: String): Flow<List<NewsArticle>> = newsDao.getArticlesByLanguageAndCategory(language, category)
 
-    suspend fun refreshArticles(language: String) {
+    suspend fun refreshArticles(language: String, category: String? = null) {
         try {
-            val apiPosts = NetworkProvider.retrofit.getPosts(lang = language)
+            val apiPosts = NetworkProvider.retrofit.getPosts(lang = language, categories = category)
             val articles = apiPosts.map { 
                 NewsArticle(
                     title = it.title.rendered, 
                     excerpt = it.excerpt?.rendered ?: "",
                     content = it.content.rendered, 
                     language = language, 
-                    category = "General",
+                    category = category ?: "General",
                     link = it.link,
                     imageUrl = it.jetpack_featured_media_url ?: ""
                 ) 

@@ -13,6 +13,7 @@ import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.outlined.BookmarkBorder
@@ -68,45 +69,74 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
 fun NewsApp(viewModel: NewsViewModel, tts: TextToSpeech) {
     val articles by viewModel.articles.collectAsState()
     val language by viewModel.language.collectAsState()
+    val category by viewModel.category.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
     val pagerState = rememberPagerState(pageCount = { articles.size })
     val context = LocalContext.current
+    var darkTheme by remember { mutableStateOf(false) }
+    var showMenu by remember { mutableStateOf(false) }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { 
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_newzquest_logo),
-                        contentDescription = "NewzQuest Logo",
-                        modifier = Modifier.height(40.dp)
+    MyApplicationTheme(darkTheme = darkTheme) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_newzquest_logo),
+                            contentDescription = "NewzQuest Logo",
+                            modifier = Modifier.size(56.dp)
+                        )
+                    },
+                    actions = {
+                        TextButton(onClick = { viewModel.toggleLanguage() }) {
+                            Text(language.uppercase())
+                        }
+                        IconButton(onClick = { showMenu = true }) {
+                            Icon(Icons.Filled.Settings, contentDescription = "Settings")
+                        }
+                        DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
+                            DropdownMenuItem(
+                                text = { Text(if (darkTheme) "Light Mode" else "Dark Mode") },
+                                onClick = { darkTheme = !darkTheme; showMenu = false }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Category: $category") },
+                                onClick = { /* Show category picker or just cycle */ viewModel.setCategory(if (category == "General") "Technology" else "General"); showMenu = false }
+                            )
+                        }
+                    }
+                )
+            }
+        ) { innerPadding ->
+            if (isLoading) {
+                Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else if (articles.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
+                    Text("No articles found")
+                }
+            } else {
+                VerticalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxSize().padding(innerPadding)
+                ) { page ->
+                    val article = articles[page]
+                    NewsArticleItem(
+                        article,
+                        onSaveClick = { viewModel.toggleSaved(article) },
+                        onTtsClick = { tts.speak(article.title + ". " + article.excerpt, TextToSpeech.QUEUE_FLUSH, null, null) },
+                        onShareClick = {
+                            val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                putExtra(android.content.Intent.EXTRA_SUBJECT, article.title)
+                                putExtra(android.content.Intent.EXTRA_TEXT, article.title + "\n\n" + article.link)
+                            }
+                            context.startActivity(android.content.Intent.createChooser(intent, "Share via"))
+                        }
                     )
-                },
-                actions = {
-                    TextButton(onClick = { viewModel.toggleLanguage() }) {
-                        Text(language.uppercase())
-                    }
                 }
-            )
-        }
-    ) { innerPadding ->
-        VerticalPager(
-            state = pagerState,
-            modifier = Modifier.fillMaxSize().padding(innerPadding)
-        ) { page ->
-            val article = articles[page]
-            NewsArticleItem(
-                article, 
-                onSaveClick = { viewModel.toggleSaved(article) },
-                onTtsClick = { tts.speak(article.title + ". " + article.excerpt, TextToSpeech.QUEUE_FLUSH, null, null) },
-                onShareClick = {
-                    val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                        type = "text/plain"
-                        putExtra(android.content.Intent.EXTRA_SUBJECT, article.title)
-                        putExtra(android.content.Intent.EXTRA_TEXT, article.title + "\n\n" + article.link)
-                    }
-                    context.startActivity(android.content.Intent.createChooser(intent, "Share via"))
-                }
-            )
+            }
         }
     }
 }

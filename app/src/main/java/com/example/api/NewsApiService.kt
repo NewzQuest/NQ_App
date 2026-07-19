@@ -5,7 +5,7 @@ import retrofit2.http.Query
 
 interface NewsApiService {
     @GET("wp-json/wp/v2/posts")
-    suspend fun getPosts(@Query("lang") lang: String): List<WordPressPost>
+    suspend fun getPosts(@Query("lang") lang: String, @Query("categories") categories: String? = null): List<WordPressPost>
 }
 
 data class WordPressPost(

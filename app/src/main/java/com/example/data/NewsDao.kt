@@ -8,8 +8,8 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface NewsDao {
-    @Query("SELECT * FROM news_articles WHERE language = :language ORDER BY timestamp DESC")
-    fun getArticlesByLanguage(language: String): Flow<List<NewsArticle>>
+    @Query("SELECT * FROM news_articles WHERE language = :language AND category = :category ORDER BY timestamp DESC")
+    fun getArticlesByLanguageAndCategory(language: String, category: String): Flow<List<NewsArticle>>
 
     @Query("SELECT * FROM news_articles WHERE isSaved = 1 ORDER BY timestamp DESC")
     fun getSavedArticles(): Flow<List<NewsArticle>>
