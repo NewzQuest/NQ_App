@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -19,8 +20,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.example.data.DatabaseProvider
 import com.example.data.NewsArticle
 import com.example.data.NewsRepository
@@ -70,7 +74,13 @@ fun NewsApp(viewModel: NewsViewModel, tts: TextToSpeech) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("NewzQuest") },
+                title = { 
+                    Image(
+                        painter = painterResource(id = com.example.R.drawable.newzquest_logo_1784483779786),
+                        contentDescription = "NewzQuest Logo",
+                        modifier = Modifier.height(40.dp)
+                    )
+                },
                 actions = {
                     TextButton(onClick = { viewModel.toggleLanguage() }) {
                         Text(language.uppercase())
@@ -108,30 +118,42 @@ fun NewsArticleItem(
     onTtsClick: () -> Unit,
     onShareClick: () -> Unit
 ) {
-    ElevatedCard(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
+    Card(
+        modifier = Modifier.fillMaxSize().padding(8.dp),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = article.title, style = MaterialTheme.typography.headlineSmall)
-            Spacer(modifier = Modifier.height(16.dp))
-            if (article.excerpt.isNotEmpty()) {
-                Text(text = article.excerpt, style = MaterialTheme.typography.bodyMedium)
-                Spacer(modifier = Modifier.height(16.dp))
+        Column(modifier = Modifier.fillMaxSize()) {
+            if (article.imageUrl.isNotEmpty()) {
+                AsyncImage(
+                    model = article.imageUrl,
+                    contentDescription = article.title,
+                    modifier = Modifier.fillMaxWidth().height(250.dp),
+                    contentScale = ContentScale.Crop
+                )
             }
-            Spacer(modifier = Modifier.weight(1f))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                IconButton(onClick = onSaveClick) {
-                    Icon(
-                        imageVector = if (article.isSaved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
-                        contentDescription = "Save"
-                    )
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(text = article.title, style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onSurface)
+                Spacer(modifier = Modifier.height(16.dp))
+                if (article.excerpt.isNotEmpty()) {
+                    Text(text = article.excerpt, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
-                IconButton(onClick = onTtsClick) {
-                    Icon(imageVector = Icons.AutoMirrored.Filled.VolumeUp, contentDescription = "TTS")
-                }
-                IconButton(onClick = onShareClick) {
-                    Icon(imageVector = Icons.Filled.Share, contentDescription = "Share")
+                Spacer(modifier = Modifier.weight(1f))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                    IconButton(onClick = onSaveClick) {
+                        Icon(
+                            imageVector = if (article.isSaved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                            contentDescription = "Save",
+                            tint = if (article.isSaved) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    IconButton(onClick = onTtsClick) {
+                        Icon(imageVector = Icons.AutoMirrored.Filled.VolumeUp, contentDescription = "TTS", tint = MaterialTheme.colorScheme.onSurface)
+                    }
+                    IconButton(onClick = onShareClick) {
+                        Icon(imageVector = Icons.Filled.Share, contentDescription = "Share", tint = MaterialTheme.colorScheme.onSurface)
+                    }
                 }
             }
         }

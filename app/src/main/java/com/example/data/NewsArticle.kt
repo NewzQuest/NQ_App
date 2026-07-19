@@ -13,5 +13,6 @@ data class NewsArticle(
     val category: String, // "Politics", "Technology", etc.
     val isSaved: Boolean = false,
     val timestamp: Long = System.currentTimeMillis(),
-    val link: String = ""
+    val link: String = "",
+    val imageUrl: String = ""
 )

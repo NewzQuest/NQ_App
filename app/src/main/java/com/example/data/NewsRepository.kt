@@ -17,7 +17,8 @@ class NewsRepository(private val newsDao: NewsDao) {
                     content = it.content.rendered, 
                     language = language, 
                     category = "General",
-                    link = it.link
+                    link = it.link,
+                    imageUrl = it.jetpack_featured_media_url ?: ""
                 ) 
             }
             newsDao.insertArticles(articles)

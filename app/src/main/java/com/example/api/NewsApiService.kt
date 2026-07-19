@@ -13,7 +13,8 @@ data class WordPressPost(
     val title: RenderedText,
     val excerpt: RenderedText?,
     val content: RenderedText,
-    val link: String
+    val link: String,
+    val jetpack_featured_media_url: String? = ""
 )
 
 data class RenderedText(val rendered: String)
