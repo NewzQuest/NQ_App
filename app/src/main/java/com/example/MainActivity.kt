@@ -76,7 +76,7 @@ fun NewsApp(viewModel: NewsViewModel, tts: TextToSpeech) {
             TopAppBar(
                 title = { 
                     Image(
-                        painter = painterResource(id = com.example.R.drawable.newzquest_logo_1784483779786),
+                        painter = painterResource(id = R.drawable.ic_newzquest_logo),
                         contentDescription = "NewzQuest Logo",
                         modifier = Modifier.height(40.dp)
                     )
